@@ -1,6 +1,7 @@
 FROM centos:7
 WORKDIR /root
 RUN yum install nano git wget epel-release zip unzip -y
+RUN mkdir -p /etc/nginx/conf.d 
 RUN git clone https://gist.github.com/d0a8ddcfb5fc8d058252f6431adbb633.git
 RUN cd d0a8ddcfb5fc8d058252f6431adbb633 && chmod +x nginx.sh  && ./nginx.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
