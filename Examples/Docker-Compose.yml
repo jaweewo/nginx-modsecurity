@@ -1,0 +1,13 @@
+version: '3.7'
+services: 
+  nginx:
+    image: jaweewo/ngix-modsec:latest
+    ports: 
+      - "80:80"
+      - "443:443"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    volumes:
+      - "YOURDIRECTORY:/etc/nginx/conf.d/"
