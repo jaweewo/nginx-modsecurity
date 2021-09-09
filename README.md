@@ -8,3 +8,6 @@ docker run -v /my/folder/configs:/etc/nginx/conf.d -p 80:80 -p 443:443 --name ng
 
 ## COMPOSE
 Inside Examples folder, you have a compose example.
+
+## IMAGE
+https://hub.docker.com/r/jaweewo/nginx-modsec/tags?page=1&ordering=last_updated
