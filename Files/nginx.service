@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio de nginx
+
+[Service]
+User=root
+ExecStart=/bin/bash /usr/local/nginx.sh
+
+[Install]
+WantedBy=multi-user.target
