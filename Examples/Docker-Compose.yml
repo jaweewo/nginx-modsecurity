@@ -1,7 +1,7 @@
 version: '3.7'
 services: 
   nginx:
-    image: jaweewo/ngix-modsec:latest
+    image: jaweewo/nginx-modsec:latest
     ports: 
       - "80:80"
       - "443:443"
