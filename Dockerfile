@@ -1,6 +1,6 @@
 FROM centos:7
 WORKDIR /root
-RUN mkdir -p /etc/nginx/conf.d && yum install nano git wget epel-release zip unzip -y
+RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl && yum install nano git wget epel-release zip unzip -y
 COPY Files/compile.sh /root/
 RUN cd /root && chmod +x compile.sh  && ./compile.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
