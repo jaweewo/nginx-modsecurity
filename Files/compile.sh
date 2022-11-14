@@ -93,9 +93,9 @@ make && make install
 echo "Installing nginx with ModSecurity and SSL"
 cd /usr/local
 git clone https://github.com/SpiderLabs/ModSecurity-nginx
-wget http://nginx.org/download/nginx-1.22.0.tar.gz
-tar -xvzf nginx-1.22.0.tar.gz
-cd /usr/local/nginx-1.22.0
+wget http://nginx.org/download/nginx-1.22.1.tar.gz
+tar -xvzf nginx-1.22.1.tar.gz
+cd /usr/local/nginx-1.22.1
 ./configure --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --with-http_ssl_module --add-module=/usr/local/ModSecurity-nginx
 make && make install
 echo "Starting nginx"
