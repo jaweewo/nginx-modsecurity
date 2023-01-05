@@ -95,9 +95,16 @@ cd /usr/local
 git clone https://github.com/SpiderLabs/ModSecurity-nginx
 wget http://nginx.org/download/nginx-1.22.1.tar.gz
 tar -xvzf nginx-1.22.1.tar.gz
+git clone https://github.com/jaweewo/nginx-ntlm-module.git
 cd /usr/local/nginx-1.22.1
-./configure --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --with-http_ssl_module --add-module=/usr/local/ModSecurity-nginx
-make && make install
+./configure --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --with-http_ssl_module --add-module=/usr/local/ModSecurity-nginx \
+--add-module=../nginx-ntlm-module \
+--http-client-body-temp-path=/var/cache/nginx/client_temp \
+        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+        --http-scgi-temp-path=/var/cache/nginx/scgi_temp 
+make && make install && mkdir -p /var/cache/nginx
 echo "Starting nginx"
 /usr/local/nginx/sbin/nginx
 
