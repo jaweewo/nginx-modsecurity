@@ -98,10 +98,10 @@ tar -xvzf nginx-1.22.1.tar.gz
 # CLONE NTLM MODULE
 git clone https://github.com/jaweewo/nginx-ntlm-module.git
 # CLONE STICKY MODULE
-git clone https://github.com/Refinitiv/nginx-sticky-module-ng.git
+git clone https://github.com/michaelneale/nginx-sticky-module.git
 cd /usr/local/nginx-1.22.1
 ./configure --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --with-http_ssl_module --add-module=/usr/local/ModSecurity-nginx \
---add-module=../nginx-ntlm-module --add-module=../nginx-sticky-module-ng \
+--add-module=../nginx-ntlm-module --add-module=../nginx-sticky-module \
 --http-client-body-temp-path=/var/cache/nginx/client_temp \
         --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
         --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
