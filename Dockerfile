@@ -1,4 +1,6 @@
 FROM centos:7
+RUN sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+yum update -y
 WORKDIR /root
 RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl && yum install nano git wget epel-release zip unzip -y
 COPY Files/compile.sh /root/
