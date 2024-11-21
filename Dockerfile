@@ -1,8 +1,8 @@
-FROM centos:7
-RUN sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-RUN yum update -y
+FROM alpine:latest
+
+RUN apk update -y
 WORKDIR /root
-RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl && yum install nano git wget epel-release zip unzip -y
+RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl && apk add nano git wget zip unzip -y
 COPY Files/compile.sh /root/
 RUN cd /root && chmod +x compile.sh  && ./compile.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
