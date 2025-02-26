@@ -103,7 +103,7 @@ sh build.sh
 ./configure
 make && make install
 cd ..
-rm -rf ModSecurity
+#rm -rf ModSecurity
 
 echo "Downloading and preparing Nginx with ModSecurity and NTLM..."
 wget http://nginx.org/download/nginx-1.26.2.tar.gz
