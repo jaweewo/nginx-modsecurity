@@ -60,78 +60,97 @@ cat << EOF
 ##%%&&&@@@@@@@@@@@@@@@&&&&&&&&&@@&&&&&@@&@@&@@@@@@@@@&@@@&&&(/////////////,...,#
 EOF
 sleep 5
-echo "Updating"
-yum update 
-echo "Installing the requirements for SSL"
-wget --no-check-certificate https://ftp.openssl.org/source/old/1.1.1/openssl-1.1.1.tar.gz
-yum install -y make gcc perl pcre-devel zlib-devel 
+echo "Updating and installing dependencies..."
+apk update && apk add --no-cache \
+  bash \
+  build-base \
+  git \
+  curl \
+  wget \
+  linux-headers \
+  pcre-dev \
+  zlib-dev \
+  openssl-dev \
+  libtool \
+  autoconf \
+  automake \
+  libxml2-dev \
+  libmaxminddb-dev \
+  yajl-dev \
+  lmdb-dev \
+  lua-dev \
+  unzip \
+  gcc \
+  g++ \
+  make
+
+echo "Downloading and installing OpenSSL..."
+wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
 tar xvf openssl-1.1.1.tar.gz
-echo "Changing to openssl folder"
 cd openssl-1.1.1
 ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
-echo "Compiling"
 make && make install
-echo "Exporting libraries"
-export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64
-echo "export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64" >> ~/.bashrc
-echo "Checking OpenSSL version"
-openssl version
+cd ..
+rm -rf openssl-1.1.1.tar.gz openssl-1.1.1
 
-echo "Install dependent tools for Nginx and Modsecurity"
-yum install -y git wget epel-release gcc-c++ flex bison yajl yajl-devel curl-devel curl GeoIP-devel doxygen zlib-devel pcre-devel lmdb-devel libxml2-devel ssdeep-devel lua-devel libtool autoconf automake
-cd /usr/local
-echo "installing ModSecurity"
-git clone https://github.com/SpiderLabs/ModSecurity
+echo "Downloading and installing ModSecurity..."
+git clone https://github.com/SpiderLabs/ModSecurity.git
 cd ModSecurity
 git checkout -b v3/master origin/v3/master
 git submodule init
 git submodule update
 sh build.sh
 ./configure
-
 make && make install
-echo "Installing nginx with ModSecurity and SSL"
-cd /usr/local
-git clone https://github.com/SpiderLabs/ModSecurity-nginx
-wget http://nginx.org/download/nginx-1.22.1.tar.gz
-tar -xvzf nginx-1.22.1.tar.gz
-# CLONE NTLM MODULE
+cd ..
+rm -rf ModSecurity
+
+echo "Downloading and preparing Nginx with ModSecurity and NTLM..."
+wget http://nginx.org/download/nginx-1.26.2.tar.gz
+tar xvf nginx-1.26.2.tar.gz
+git clone https://github.com/SpiderLabs/ModSecurity-nginx.git
 git clone https://github.com/jaweewo/nginx-ntlm-module.git
-# CLONE STICKY MODULE
-#git clone https://github.com/michaelneale/nginx-sticky-module.git
-cd /usr/local/nginx-1.22.1
-./configure --http-log-path=/var/log/nginx/access.log --error-log-path=/var/log/nginx/error.log --with-http_ssl_module --add-module=/usr/local/ModSecurity-nginx \
---add-module=../nginx-ntlm-module \ 
---http-client-body-temp-path=/var/cache/nginx/client_temp \
-        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
-        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
-        --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
-        --http-scgi-temp-path=/var/cache/nginx/scgi_temp 
-make && make install && mkdir -p /var/cache/nginx
-echo "Starting nginx"
-/usr/local/nginx/sbin/nginx
 
-## WAF RULES
-echo "Waf Rules"
+cd nginx-1.26.2
+./configure --prefix=/usr/local/nginx \
+  --with-http_ssl_module \
+  --add-module=../ModSecurity-nginx \
+  --add-module=../nginx-ntlm-module \
+  --with-cc-opt="-Wno-error"
+make && make install
+cd ..
+rm -rf nginx-1.26.2 nginx-1.26.2.tar.gz ModSecurity-nginx nginx-ntlm-module
+
+echo "Setting up ModSecurity configuration..."
 mkdir -p /usr/local/nginx/conf/modsecurity
-cp /usr/local/ModSecurity/modsecurity.conf-recommended /usr/local/nginx/conf/modsecurity/modsecurity.conf
-cp /usr/local/ModSecurity/unicode.mapping /usr/local/nginx/conf/modsecurity/
-cd /usr/local
-wget http://www.modsecurity.cn/download/corerule/owasp-modsecurity-crs-3.3-dev.zip
-unzip owasp-modsecurity-crs-3.3-dev.zip
-cd owasp-modsecurity-crs-3.3-dev
-cp crs-setup.conf.example /usr/local/nginx/conf/modsecurity/crs-setup.conf
-cp -r rules /usr/local/nginx/conf/modsecurity
-cd /usr/local/nginx/conf/modsecurity/rules
-mv REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
-mv  RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example  RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
-echo "## FOR MAKING THIS WORK YOU NEED TO CHANGE SOME THINGS
-# ON NGINX CONF --> ADD THIS ON HTTP BLOCK
-#modsecurity on;
-#modsecurity_rules_file /usr/local/nginx/conf/modsecurity/modsecurity.conf;
-# EDIT /usr/local/nginx/conf/modsecurity/modsecurity.conf 
-# CHANGE --> SecRuleEngine DetectionOnly to SecRuleEngine On
-# ADD --> Include /usr/local/nginx/conf/modsecurity/crs-setup.conf
-#         Include /usr/local/nginx/conf/modsecurity/rules/*.conf"
+cp /usr/local/modsecurity/etc/modsecurity.conf-recommended /usr/local/nginx/conf/modsecurity/modsecurity.conf
+cp /usr/local/modsecurity/unicode.mapping /usr/local/nginx/conf/modsecurity/
 
-/usr/local/nginx/sbin/nginx -s reload
+echo "Downloading OWASP Core Rule Set (CRS)..."
+wget https://github.com/coreruleset/coreruleset/archive/refs/heads/v3.3/dev.zip -O owasp-modsecurity-crs-3.3-dev.zip
+unzip owasp-modsecurity-crs-3.3-dev.zip
+mv coreruleset-3.3-dev /usr/local/nginx/conf/modsecurity/crs
+cp /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf.example /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf
+rm -rf owasp-modsecurity-crs-3.3-dev.zip
+
+echo "Finalizing ModSecurity setup..."
+cd /usr/local/nginx/conf/modsecurity/crs/rules
+for f in *.example; do mv "$f" "${f%.example}"; done
+
+echo "Cleaning up..."
+apk del build-base git curl wget linux-headers gcc g++ make autoconf automake libtool unzip
+rm -rf /var/cache/apk/*
+
+echo "## Installation complete! Follow these instructions to enable ModSecurity:
+# 1. Edit /usr/local/nginx/conf/nginx.conf
+#    - Add the following to the HTTP block:
+#      modsecurity on;
+#      modsecurity_rules_file /usr/local/nginx/conf/modsecurity/modsecurity.conf;
+# 2. Update ModSecurity configuration:
+#    - Edit /usr/local/nginx/conf/modsecurity/modsecurity.conf
+#      Change 'SecRuleEngine DetectionOnly' to 'SecRuleEngine On'.
+#    - Include CRS setup and rules in modsecurity.conf:
+#      Include /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf
+#      Include /usr/local/nginx/conf/modsecurity/crs/rules/*.conf
+# 3. Reload Nginx:
+#      /usr/local/nginx/sbin/nginx -s reload"
