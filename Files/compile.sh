@@ -102,9 +102,8 @@ git submodule update
 sh build.sh
 ./configure
 make && make install
-cp unicode.mapping /usr/local/nginx/conf/modesecurity/unicode.mapping
 cd ..
-#rm -rf ModSecurity
+rm -rf ModSecurity
 
 echo "Downloading and preparing Nginx with ModSecurity and NTLM..."
 wget http://nginx.org/download/nginx-1.26.2.tar.gz
