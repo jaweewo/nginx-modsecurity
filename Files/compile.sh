@@ -102,6 +102,7 @@ git submodule update
 sh build.sh
 ./configure
 make && make install
+cp unicode.mapping /usr/local/nginx/conf/modesecurity/unicode.mapping
 cd ..
 #rm -rf ModSecurity
 
