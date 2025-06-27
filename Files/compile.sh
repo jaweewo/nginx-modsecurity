@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 echo " PLEASE READ THE END OF THE SCRIPT, IT IS IMPORTANT"
 cat << EOF
 *,************,(&&&&&&&&@&&&&%,,,,,,,,,*,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -121,6 +121,7 @@ cd nginx-1.28.0
 make && make install
 cd ..
 rm -rf nginx-1.28.0 nginx-1.28.0.tar.gz ModSecurity-nginx nginx-ntlm-module
+
 
 echo "Setting up ModSecurity configuration..."
 mkdir -p /usr/local/nginx/conf/modsecurity
