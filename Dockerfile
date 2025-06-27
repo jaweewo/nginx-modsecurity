@@ -17,6 +17,7 @@ RUN chmod +x /root/compile.sh && /root/compile.sh
 COPY nginx.conf /usr/local/nginx/conf/nginx.conf
 COPY modsecurity.conf /usr/local/nginx/conf/modsecurity/modsecurity.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY Files/unicode.mapping /usr/local/nginx/conf/modsecurity/unicode.mapping
 
 # Haz que el entrypoint script sea ejecutable
 RUN chmod +x /docker-entrypoint.sh
@@ -27,6 +28,5 @@ EXPOSE 80 443
 # Establece el punto de entrada del contenedor
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-# Define el comando por defecto
 #CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
 
