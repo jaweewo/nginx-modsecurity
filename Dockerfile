@@ -2,7 +2,7 @@
 FROM alpine:latest
 
 # Actualiza los índices de paquetes y configura el entorno de trabajo
-RUN apk update && apk add --no-cache bash nano git wget zip unzip
+RUN apk update && apk add --no-cache bash nano git wget zip unzip pcre2-dev
 
 WORKDIR /root
 
