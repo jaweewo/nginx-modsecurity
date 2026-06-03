@@ -11,7 +11,9 @@ RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl
 COPY Files/compile.sh /root/
 
 # Asegúrate de que el script sea ejecutable y compila Nginx con ModSecurity
-RUN chmod +x /root/compile.sh && /root/compile.sh
+RUN chmod +x /root/compile.sh && /root/compile.sh \
+    && ln -s /usr/local/nginx/conf/mime.types /etc/nginx/mime.types \
+    && ln -s /usr/local/nginx/conf/fastcgi_params /etc/nginx/fastcgi_params
 
 # Copia los archivos de configuración al contenedor
 COPY nginx.conf /usr/local/nginx/conf/nginx.conf
