@@ -102,6 +102,9 @@ git submodule update --init --recursive
 sh build.sh
 ./configure
 make && make install
+mkdir -p /usr/local/modsecurity/etc
+cp modsecurity.conf-recommended /usr/local/modsecurity/etc/
+cp unicode.mapping /usr/local/modsecurity/
 cd ..
 rm -rf ModSecurity
 
