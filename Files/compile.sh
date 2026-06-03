@@ -88,7 +88,7 @@ echo "Downloading and installing OpenSSL..."
 wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
 tar xvf openssl-1.1.1.tar.gz
 cd openssl-1.1.1
-./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
+./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic no-async
 make && make install
 cd ..
 rm -rf openssl-1.1.1.tar.gz openssl-1.1.1
