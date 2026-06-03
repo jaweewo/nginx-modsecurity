@@ -130,11 +130,11 @@ cp /usr/local/modsecurity/etc/modsecurity.conf-recommended /usr/local/nginx/conf
 cp /usr/local/modsecurity/unicode.mapping /usr/local/nginx/conf/modsecurity/
 
 echo "Downloading OWASP Core Rule Set (CRS)..."
-wget https://github.com/coreruleset/coreruleset/archive/refs/heads/v3.3/dev.zip -O owasp-modsecurity-crs-3.3-dev.zip
-unzip owasp-modsecurity-crs-3.3-dev.zip
-mv coreruleset-3.3-dev /usr/local/nginx/conf/modsecurity/crs
+wget https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.5.zip -O owasp-modsecurity-crs-3.3.5.zip
+unzip owasp-modsecurity-crs-3.3.5.zip
+mv coreruleset-3.3.5 /usr/local/nginx/conf/modsecurity/crs
 cp /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf.example /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf
-rm -rf owasp-modsecurity-crs-3.3-dev.zip
+rm -rf owasp-modsecurity-crs-3.3.5.zip
 
 echo "Finalizing ModSecurity setup..."
 cd /usr/local/nginx/conf/modsecurity/crs/rules
