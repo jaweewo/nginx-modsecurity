@@ -68,7 +68,7 @@ apk update && apk add --no-cache \
   curl \
   wget \
   linux-headers \
-  pcre-dev \
+  pcre2-dev \
   zlib-dev \
   openssl-dev \
   libtool \
