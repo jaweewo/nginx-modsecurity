@@ -117,6 +117,7 @@ git clone https://github.com/jaweewo/nginx-ntlm-module.git
 cd nginx-1.30.2
 ./configure --prefix=/usr/local/nginx \
   --with-http_ssl_module \
+  --with-http_stub_status_module \
   --add-module=../ModSecurity-nginx \
   --add-module=../nginx-ntlm-module \
   --with-cc-opt="-Wno-error"
