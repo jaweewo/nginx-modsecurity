@@ -98,7 +98,6 @@ apk update && apk add --no-cache \
 echo "Downloading and installing ModSecurity..."
 git clone https://github.com/SpiderLabs/ModSecurity.git
 cd ModSecurity
-git checkout -b v3/master origin/v3/master
 git submodule init
 git submodule update --init --recursive
 sh build.sh
