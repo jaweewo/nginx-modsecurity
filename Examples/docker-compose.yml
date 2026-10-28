@@ -1,9 +1,12 @@
-version: '3.7'
-services: 
+services:
   nginx:
-    image: jaweewo/nginx-modsec:latest
-    ports: 
+    image: jaweewo/nginx-modsecurity:main
+    container_name: nginx-modsecurity
+    restart: unless-stopped
+    ports:
       - "80:80"
-      - "443:443"
+      # Uncomment after configuring an HTTPS server and certificates.
+      # - "443:443"
     volumes:
-      - "YOURDIRECTORY:/etc/nginx/conf.d/"
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
