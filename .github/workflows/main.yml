@@ -3,7 +3,7 @@ name: ci
 on:
   push:
     branches:
-      - openssl-3
+      - main
 
 permissions:
   contents: read
@@ -55,3 +55,14 @@ jobs:
           if docker container inspect nginx-modsec-smoke >/dev/null 2>&1; then
             docker rm --force nginx-modsec-smoke
           fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Publish image to Docker Hub
+        run: |
+          docker tag nginx-modsec-smoke:${{ github.sha }} jaweewo/nginx-modsecurity:main
+          docker push jaweewo/nginx-modsecurity:main
