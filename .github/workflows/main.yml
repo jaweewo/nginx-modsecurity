@@ -3,28 +3,55 @@ name: ci
 on:
   push:
     branches:
-      - 'ntlm'
+      - openssl-3
+
+permissions:
+  contents: read
 
 jobs:
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      -
-        name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      -
-        name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          tags: jaweewo/nginx-modsec:ntlm
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build --tag nginx-modsec-smoke:${{ github.sha }} .
+
+      - name: Run container smoke test
+        run: |
+          set -eu
+          docker run --detach --name nginx-modsec-smoke \
+            --publish 127.0.0.1:8080:80 \
+            nginx-modsec-smoke:${{ github.sha }}
+          docker exec nginx-modsec-smoke /usr/local/nginx/sbin/nginx -t
+          nginx_version="$(docker exec nginx-modsec-smoke /usr/local/nginx/sbin/nginx -v 2>&1)"
+          echo "$nginx_version"
+          test "$nginx_version" = "nginx version: nginx/1.30.6"
+          openssl_version="$(docker exec nginx-modsec-smoke openssl version)"
+          echo "$openssl_version"
+          case "$openssl_version" in
+            "OpenSSL 3.5."*) ;;
+            *)
+              echo "Se esperaba OpenSSL de la rama LTS 3.5."
+              exit 1
+              ;;
+          esac
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/ >/dev/null; then
+              echo "Nginx respondió correctamente por HTTP."
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs nginx-modsec-smoke
+          echo "Nginx no respondió por HTTP dentro del tiempo esperado."
+          exit 1
+
+      - name: Remove test container
+        if: always()
+        run: |
+          if docker container inspect nginx-modsec-smoke >/dev/null 2>&1; then
+            docker rm --force nginx-modsec-smoke
+          fi

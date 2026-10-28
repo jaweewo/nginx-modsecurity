@@ -1,5 +1,5 @@
-# Usa la última imagen base de Alpine
-FROM alpine:latest
+# Fija la última versión publicada de Alpine para builds reproducibles
+FROM alpine:3.24.3
 
 # Actualiza los índices de paquetes y configura el entorno de trabajo
 RUN apk update && apk add --no-cache bash nano git wget zip unzip
@@ -31,4 +31,3 @@ EXPOSE 80 443
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 #CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
-
