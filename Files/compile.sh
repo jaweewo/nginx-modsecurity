@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo " PLEASE READ THE END OF THE SCRIPT, IT IS IMPORTANT"
 cat << EOF
 *,************,(&&&&&&&&@&&&&%,,,,,,,,,*,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -59,6 +59,7 @@ cat << EOF
 #%%&&@@@@@&@@&@@@@@@@&&&&&@&&&&@@@&&&&&&@@@&&@@@@&&@@@&&&&&#/////////////,...,#%
 ##%%&&&@@@@@@@@@@@@@@@&&&&&&&&&@@&&&&&@@&@@&@@@@@@@@@&@@@&&&(/////////////,...,#
 EOF
+set -euo pipefail
 sleep 5
 echo "Updating and installing dependencies..."
 apk update && apk add --no-cache \
@@ -68,8 +69,9 @@ apk update && apk add --no-cache \
   curl \
   wget \
   linux-headers \
-  pcre-dev \
+  pcre2-dev \
   zlib-dev \
+  openssl \
   openssl-dev \
   libtool \
   autoconf \
@@ -84,34 +86,36 @@ apk update && apk add --no-cache \
   g++ \
   make
 
-echo "Downloading and installing OpenSSL..."
-wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
-tar xvf openssl-1.1.1.tar.gz
-cd openssl-1.1.1
-./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic
-make && make install
-cd ..
-rm -rf openssl-1.1.1.tar.gz openssl-1.1.1
+#echo "Downloading and installing OpenSSL..."
+#wget https://www.openssl.org/source/openssl-1.1.1.tar.gz
+#tar xvf openssl-1.1.1.tar.gz
+#cd openssl-1.1.1
+#./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib no-shared zlib-dynamic no-async
+#make && make install
+#cd ..
+#rm -rf openssl-1.1.1.tar.gz openssl-1.1.1
 
 echo "Downloading and installing ModSecurity..."
 git clone https://github.com/SpiderLabs/ModSecurity.git
 cd ModSecurity
-git checkout -b v3/master origin/v3/master
 git submodule init
-git submodule update
+git submodule update --init --recursive
 sh build.sh
 ./configure
 make && make install
+mkdir -p /usr/local/modsecurity/etc
+cp modsecurity.conf-recommended /usr/local/modsecurity/etc/
+cp unicode.mapping /usr/local/modsecurity/
 cd ..
 rm -rf ModSecurity
 
 echo "Downloading and preparing Nginx with ModSecurity and NTLM..."
-wget http://nginx.org/download/nginx-1.28.0.tar.gz
-tar xvf nginx-1.28.0.tar.gz
+wget https://nginx.org/download/nginx-1.30.6.tar.gz
+tar xvf nginx-1.30.6.tar.gz
 git clone https://github.com/SpiderLabs/ModSecurity-nginx.git
 git clone https://github.com/jaweewo/nginx-ntlm-module.git
 
-cd nginx-1.28.0
+cd nginx-1.30.6
 ./configure --prefix=/usr/local/nginx \
   --with-http_ssl_module \
   --with-http_stub_status_module \
@@ -120,8 +124,7 @@ cd nginx-1.28.0
   --with-cc-opt="-Wno-error"
 make && make install
 cd ..
-rm -rf nginx-1.28.0 nginx-1.28.0.tar.gz ModSecurity-nginx nginx-ntlm-module
-
+rm -rf nginx-1.30.6 nginx-1.30.6.tar.gz ModSecurity-nginx nginx-ntlm-module
 
 echo "Setting up ModSecurity configuration..."
 mkdir -p /usr/local/nginx/conf/modsecurity
@@ -129,11 +132,11 @@ cp /usr/local/modsecurity/etc/modsecurity.conf-recommended /usr/local/nginx/conf
 cp /usr/local/modsecurity/unicode.mapping /usr/local/nginx/conf/modsecurity/
 
 echo "Downloading OWASP Core Rule Set (CRS)..."
-wget https://github.com/coreruleset/coreruleset/archive/refs/heads/v3.3/dev.zip -O owasp-modsecurity-crs-3.3-dev.zip
-unzip owasp-modsecurity-crs-3.3-dev.zip
-mv coreruleset-3.3-dev /usr/local/nginx/conf/modsecurity/crs
+wget https://github.com/coreruleset/coreruleset/archive/refs/tags/v3.3.5.zip -O owasp-modsecurity-crs-3.3.5.zip
+unzip owasp-modsecurity-crs-3.3.5.zip
+mv coreruleset-3.3.5 /usr/local/nginx/conf/modsecurity/crs
 cp /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf.example /usr/local/nginx/conf/modsecurity/crs/crs-setup.conf
-rm -rf owasp-modsecurity-crs-3.3-dev.zip
+rm -rf owasp-modsecurity-crs-3.3.5.zip
 
 echo "Finalizing ModSecurity setup..."
 cd /usr/local/nginx/conf/modsecurity/crs/rules

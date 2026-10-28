@@ -1,8 +1,8 @@
-# Usa la última imagen base de Alpine
-FROM alpine:latest
+# Fija la última versión publicada de Alpine para builds reproducibles
+FROM alpine:3.24.3
 
 # Actualiza los índices de paquetes y configura el entorno de trabajo
-RUN apk update && apk add --no-cache bash nano git wget zip unzip pcre2-dev
+RUN apk update && apk add --no-cache bash nano git wget zip unzip
 
 WORKDIR /root
 
@@ -11,7 +11,9 @@ RUN mkdir -p /etc/nginx/conf.d /etc/nginx/ssl
 COPY Files/compile.sh /root/
 
 # Asegúrate de que el script sea ejecutable y compila Nginx con ModSecurity
-RUN chmod +x /root/compile.sh && /root/compile.sh
+RUN chmod +x /root/compile.sh && /root/compile.sh \
+    && ln -s /usr/local/nginx/conf/mime.types /etc/nginx/mime.types \
+    && ln -s /usr/local/nginx/conf/fastcgi_params /etc/nginx/fastcgi_params
 
 # Copia los archivos de configuración al contenedor
 COPY nginx.conf /usr/local/nginx/conf/nginx.conf
@@ -29,4 +31,3 @@ EXPOSE 80 443
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 #CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]
-
