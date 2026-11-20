@@ -110,12 +110,12 @@ cd ..
 rm -rf ModSecurity
 
 echo "Downloading and preparing Nginx with ModSecurity and NTLM..."
-wget https://nginx.org/download/nginx-1.30.6.tar.gz
-tar xvf nginx-1.30.6.tar.gz
+wget https://nginx.org/download/nginx-1.30.7.tar.gz
+tar xvf nginx-1.30.7.tar.gz
 git clone https://github.com/SpiderLabs/ModSecurity-nginx.git
 git clone https://github.com/jaweewo/nginx-ntlm-module.git
 
-cd nginx-1.30.6
+cd nginx-1.30.7
 ./configure --prefix=/usr/local/nginx \
   --with-http_ssl_module \
   --with-http_stub_status_module \
@@ -124,7 +124,7 @@ cd nginx-1.30.6
   --with-cc-opt="-Wno-error"
 make && make install
 cd ..
-rm -rf nginx-1.30.6 nginx-1.30.6.tar.gz ModSecurity-nginx nginx-ntlm-module
+rm -rf nginx-1.30.7 nginx-1.30.7.tar.gz ModSecurity-nginx nginx-ntlm-module
 
 echo "Setting up ModSecurity configuration..."
 mkdir -p /usr/local/nginx/conf/modsecurity
